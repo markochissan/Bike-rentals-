@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bike Haven Rentals</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+        }
+
+        .header a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .header .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .header .search {
+            display: flex;
+            align-items: center;
+        }
+
+        .header input {
+            padding: 5px;
+            margin-right: 5px;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        .bike-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: white;
+            margin: 15px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 250px;
+        }
+
+        .bike-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .bike-card h3 {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+
+        .bikes-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background: #333;
+            color: white;
+            margin-top: 20px;
+        }
+
+        #popup_overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">Bike Haven Rentals</div>
+        <nav>
+            <a href="#">Home</a>
+            <a href="#">Bikes</a>
+            <a href="#">Contact</a>
+        </nav>
+        <div class="search">
+            <input type="text" placeholder="Search bikes...">
+            <button>🔍</button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <h1>Explore Our Rental Bikes</h1>
+        <div class="bikes-container"></div>
+
+        <div id="popup_overlay">
+            <div class="popup" id="bikeDetailsPopup"></div>
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2024 Bike Haven Rentals. All Rights Reserved.
+    </footer>
+
+    <script>
+        fetch('https://www.cc.puv.fi/~hmh/fed/fedApi/bikes/')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(allBikes => {
+                const bikesContainer = document.querySelector('.bikes-container');
+
+                allBikes.forEach(bike => {
+                    const bikeCard = document.createElement('div');
+                    bikeCard.classList.add('bike-card');
+
+                    const bikeImage = document.createElement('img');
+                    bikeImage.src = bike.img_url;
+                    bikeImage.alt = bike.model;
+
+                    const bikeName = document.createElement('h3');
+                    bikeName.textContent = bike.model;
+
+                    bikeCard.appendChild(bikeImage);
+                    bikeCard.appendChild(bikeName);
+
+                    bikeCard.addEventListener('click', () => {
+                        const popupOverlay = document.getElementById('popup_overlay');
+                        const popupContent = document.getElementById('bikeDetailsPopup');
+
+                        popupContent.innerHTML = `
+                            <h2>${bike.model}</h2>
+                            <p>Manufacturer: ${bike.manuf}</p>
+                            <p>Gear: ${bike.gear}</p>
+                            <p>Gear Manufacturer: ${bike.gear_manuf}</p>
+                            <p>Size: ${bike.size}</p>
+                            <p>Details: ${bike.details}</p>
+                            <button onclick="closePopup()">Close</button>
+                        `;
+
+                        popupOverlay.style.display = 'flex';
+                    });
+
+                    bikesContainer.appendChild(bikeCard);
+                });
+            })
+            .catch(error => console.error('Error fetching bikes:', error));
+
+        function closePopup() {
+            const popupOverlay = document.getElementById('popup_overlay');
+            popupOverlay.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
